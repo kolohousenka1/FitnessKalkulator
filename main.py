@@ -7,7 +7,8 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("Moja Tkinter Aplikácia")
-        self.root.geometry("800x600")  # Nastavenie veľkosti okna
+        self.root.geometry("800x600")
+        self.root.configure(bg="#16315c")
 
         self.vstup_var = tk.StringVar()
         self.vystup_var = tk.StringVar()
@@ -16,9 +17,8 @@ class App:
         self.create_widgets()
 
     def create_widgets(self):
-
-        label = ttk.Label(self.root, text="tkinter zaklad", font=("Arial", 16))
-        label.pack(pady=20)
+        label = ttk.Label(self.root, text="Fitness Kalkulačka", font=("Arial", 24, "bold"), background="#16315c", foreground="#d8dce3")
+        label.pack(pady=5)
         vstup = ttk.Entry(self.root, textvariable=self.vstup_var, font=("Arial", 16))
         vstup.pack(pady=20)
         tlacidlo = ttk.Button(self.root, command=self.urob, text="Stlač")
