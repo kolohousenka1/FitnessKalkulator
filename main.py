@@ -103,21 +103,49 @@ class App:
             height_m = height_cm / 100  # Convert height to meters
             bmi = weight / (height_m ** 2)  # BMI calculation
 
-            # Interpretácia výsledkov
-            if bmi < 18.5:
-                status = "Podváha"
-            elif 18.5 <= bmi < 24.9:
-                status = "Normálna hmotnosť"
-            elif 25 <= bmi < 29.9:
-                status = "Nadváha"
+            # Interpretácia výsledkov s ohľadom na vek
+            if age < 18:
+                status = self.interpret_bmi_youth(bmi)
+            elif age >= 65:
+                status = self.interpret_bmi_elderly(bmi)
             else:
-                status = "Obezita"
+                status = self.interpret_bmi_adult(bmi)
 
             self.output_var.set(f"Váš BMI: {bmi:.2f} ({status})")
 
-        except ValueError as e:
+        except ValueError:
             self.output_var.set("Chyba: Skontrolujte vstupy.")
             messagebox.showerror("Chyba", "Zadali ste nekorektné hodnoty. Uistite sa, že hodnoty sú kladné.")
+
+    def interpret_bmi_youth(self, bmi):
+        if bmi < 18.5:
+            return "Podváha (Konzultujte s lekárom)"
+        elif 18.5 <= bmi < 24.9:
+            return "Normálna hmotnosť"
+        elif 25 <= bmi < 29.9:
+            return "Nadváha (Konzultujte s lekárom)"
+        else:
+            return "Obezita (Konzultujte s lekárom)"
+
+    def interpret_bmi_adult(self, bmi):
+        if bmi < 18.5:
+            return "Podváha"
+        elif 18.5 <= bmi < 24.9:
+            return "Normálna hmotnosť"
+        elif 25 <= bmi < 29.9:
+            return "Nadváha"
+        else:
+            return "Obezita"
+
+    def interpret_bmi_elderly(self, bmi):
+        if bmi < 22:
+            return "Podváha (Konzultujte s lekárom)"
+        elif 22 <= bmi < 27:
+            return "Normálna hmotnosť"
+        elif 27 <= bmi < 30:
+            return "Mierna nadváha"
+        else:
+            return "Obezita (Konzultujte s lekárom)"
 
 
 if __name__ == "__main__":
