@@ -139,7 +139,7 @@ class App:
 
     def interpret_bmi_elderly(self, bmi):
         if bmi < 22:
-            return "Podváha (Konzultujte s lekárom)"
+            return "Podváha (Konzultujte s lekáromm)"
         elif 22 <= bmi < 27:
             return "Normálna hmotnosť"
         elif 27 <= bmi < 30:
