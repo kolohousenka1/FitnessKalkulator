@@ -179,9 +179,8 @@ class App:
                 ("Obezita", 16, "#d62728"),
             ]
 
-
         for label, percentage, color in categories:
-            extent = (360 * percentage) / 100  # Convert percentage to degree
+            extent = (360 * percentage) / 100
             self.canvas.create_arc(
                 50, 50, 350, 350, start=start_angle, extent=extent, fill=color, outline=""
             )
