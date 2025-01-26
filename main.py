@@ -6,7 +6,7 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("Moja Tkinter Aplikácia")
-        self.root.geometry("800x600")
+        self.root.geometry("800x800")
         self.root.configure(bg="#16315c")
 
         self.height_var = tk.StringVar()
@@ -91,6 +91,10 @@ class App:
         )
         vystup.pack(pady=20)
 
+        # Canvas for Circular Graph
+        self.canvas = tk.Canvas(self.root, width=400, height=400, bg="#16315c", highlightthickness=0)
+        self.canvas.pack(pady=10)
+
     def calculate_bmi(self):
         try:
             height_cm = float(self.height_var.get().strip())
@@ -112,6 +116,7 @@ class App:
                 status = self.interpret_bmi_adult(bmi)
 
             self.output_var.set(f"Váš BMI: {bmi:.2f} ({status})")
+            self.update_graph(age)
 
         except ValueError:
             self.output_var.set("Chyba: Skontrolujte vstupy.")
@@ -119,33 +124,68 @@ class App:
 
     def interpret_bmi_youth(self, bmi):
         if bmi < 18.5:
-            return "Podváha (Konzultujte s lekárom)"
+            return "Podváha (Konzultujte s lekárom)\nGraf BMI pre mládež:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
         elif 18.5 <= bmi < 24.9:
-            return "Normálna hmotnosť"
+            return "Normálna hmotnosť\nGraf BMI pre mládež:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
         elif 25 <= bmi < 29.9:
-            return "Nadváha (Konzultujte s lekárom)"
+            return "Nadváha (Konzultujte s lekárom)\nGraf BMI pre mládež:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
         else:
-            return "Obezita (Konzultujte s lekárom)"
+            return "Obezita (Konzultujte s lekárom)\nGraf BMI pre mládež:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
 
     def interpret_bmi_adult(self, bmi):
         if bmi < 18.5:
-            return "Podváha"
+            return "Podváha\nGraf BMI pre dospelých:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
         elif 18.5 <= bmi < 24.9:
-            return "Normálna hmotnosť"
+            return "Normálna hmotnosť\nGraf BMI pre dospelých:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
         elif 25 <= bmi < 29.9:
-            return "Nadváha"
+            return "Nadváha\nGraf BMI pre dospelých:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
         else:
-            return "Obezita"
+            return "Obezita\nGraf BMI pre dospelých:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
 
     def interpret_bmi_elderly(self, bmi):
         if bmi < 22:
-            return "Podváha (Konzultujte s lekáromm)"
+            return "Podváha (Konzultujte s lekáromm)\nGraf BMI pre ľudí nad 65 rokov:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
         elif 22 <= bmi < 27:
-            return "Normálna hmotnosť"
+            return "Normálna hmotnosť\nGraf BMI pre ľudí nad 65 rokov:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
         elif 27 <= bmi < 30:
-            return "Mierna nadváha"
+            return "Mierna nadváha\nGraf BMI pre ľudí nad 65 rokov:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
         else:
-            return "Obezita (Konzultujte s lekárom)"
+            return "Obezita (Konzultujte s lekárom)\nGraf BMI pre ľudí nad 65 rokov:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
+
+    def update_graph(self, age_category):
+        self.canvas.delete("all")
+        start_angle = 0
+
+        if age_category <= 18:
+            categories = [
+                ("Podváha", 3, "#1f77b4"),
+                ("Normálna hmotnosť", 63, "#2ca02c"),
+                ("Nadváha", 21, "#ff7f0e"),
+                ("Obezita", 13, "#d62728"),
+            ]
+        elif age_category < 65:
+            categories = [
+                ("Podváha", 2, "#1f77b4"),
+                ("Normálna hmotnosť", 40, "#2ca02c"),
+                ("Nadváha", 25, "#ff7f0e"),
+                ("Obezita", 33, "#d62728"),
+            ]
+
+        elif age_category >= 65:
+            categories = [
+                ("Podváha", 3, "#1f77b4"),
+                ("Normálna hmotnosť", 60, "#2ca02c"),
+                ("Nadváha", 21, "#ff7f0e"),
+                ("Obezita", 16, "#d62728"),
+            ]
+
+
+        for label, percentage, color in categories:
+            extent = (360 * percentage) / 100  # Convert percentage to degree
+            self.canvas.create_arc(
+                50, 50, 350, 350, start=start_angle, extent=extent, fill=color, outline=""
+            )
+            start_angle += extent
 
 
 if __name__ == "__main__":
