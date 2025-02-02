@@ -119,7 +119,7 @@ class App:
             2: 0.9,
             3: 0.8
         }
-        graph_text = "\nGráf percentá ľudí vo vašej vekovej skupine podľa percentá BMI: \npopis grafu: modrá =, zelená =, oranžová = , červená = "
+        graph_text = "\nGráf percentá ľudí vo vašej vekovej skupine podľa percentá BMI: \npopis grafu: modrá = Podváha, zelená = Primeraná hmotnosť, oranžová = Mierna Obezita, červená = Ťažká Obezita"
 
         try:
             height_cm = float(self.height_var.get().strip())
