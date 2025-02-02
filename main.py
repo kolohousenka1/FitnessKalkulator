@@ -12,6 +12,7 @@ class App:
         self.height_var = tk.StringVar()
         self.weight_var = tk.StringVar()
         self.age_var = tk.StringVar()
+        self.gender_var = tk.StringVar()
         self.output_var = tk.StringVar()
 
         self.create_widgets()
@@ -21,7 +22,7 @@ class App:
         title = ttk.Label(
             self.root,
             text="Fitness Kalkulačka",
-            font=("Arial", 28, "bold"),
+            font=("Arial", 24, "bold"),
             background="#16315c",
             foreground="#d8dce3",
         )
@@ -31,7 +32,7 @@ class App:
         hightLabel = ttk.Label(
             self.root,
             text="Zadajte svoju výšku v centimetroch",
-            font=("Arial", 24, "bold"),
+            font=("Arial", 20, "bold"),
             background="#16315c",
             foreground="#d8dce3",
         )
@@ -39,16 +40,16 @@ class App:
         heightEntry = ttk.Entry(
             self.root,
             textvariable=self.height_var,
-            font=("Arial", 16),
+            font=("Arial", 14),
             width=50,
             justify="center",
         )
-        heightEntry.pack(pady=(0, 20))
+        heightEntry.pack(pady=(0, 10))
 
         weightLabel = ttk.Label(
             self.root,
             text="Zadajte svoju váhu v kilogramoch",
-            font=("Arial", 24, "bold"),
+            font=("Arial", 20, "bold"),
             background="#16315c",
             foreground="#d8dce3",
         )
@@ -56,16 +57,16 @@ class App:
         weightEntry = ttk.Entry(
             self.root,
             textvariable=self.weight_var,
-            font=("Arial", 16),
+            font=("Arial", 14),
             width=50,
             justify="center",
         )
-        weightEntry.pack(pady=(0, 20))
+        weightEntry.pack(pady=(0, 10))
 
         ageLabel = ttk.Label(
             self.root,
             text="Zadajte svoj vek",
-            font=("Arial", 24, "bold"),
+            font=("Arial", 20, "bold"),
             background="#16315c",
             foreground="#d8dce3",
         )
@@ -73,13 +74,22 @@ class App:
         ageEntry = ttk.Entry(
             self.root,
             textvariable=self.age_var,
-            font=("Arial", 16),
+            font=("Arial", 14),
             width=50,
             justify="center",
         )
-        ageEntry.pack(pady=(0, 20))
+        ageEntry.pack(pady=(0, 10))
 
-        tlacidlo = ttk.Button(self.root, command=self.calculate_bmi, text="Vypočítať BMI")
+        self.gender_var.set("Male")
+
+        tk.Radiobutton(
+            root, text="Muž", variable=self.gender_var, value="Male", bg="#16315c", fg="#d8dce3"
+        ).pack()
+        tk.Radiobutton(
+            root, text="Žena", variable=self.gender_var, value="Female", bg="#16315c", fg="#d8dce3"
+        ).pack()
+
+        tlacidlo = ttk.Button(self.root, command=self.run, text="Vypočítať BMI")
         tlacidlo.pack(pady=20)
 
         vystup = ttk.Label(
@@ -95,19 +105,33 @@ class App:
         self.canvas = tk.Canvas(self.root, width=400, height=400, bg="#16315c", highlightthickness=0)
         self.canvas.pack(pady=10)
 
-    def calculate_bmi(self):
+
+    def run(self):
+        categories_dict = {
+            0: "Podváha (Konzultujte s lekárom)",
+            1: "Normálna hmotnosť",
+            2: "Nadváha (Konzultujte s lekárom)",
+            3: "Obezita (Konzultujte s lekárom)"
+        }
+        calories_dict = {
+            0: 1.3,
+            1: 1,
+            2: 0.9,
+            3: 0.8
+        }
+        graph_text = "\nGráf percentá ľudí vo vašej vekovej skupine podľa percentá BMI: \npopis grafu: modrá =, zelená =, oranžová = , červená = "
+
         try:
             height_cm = float(self.height_var.get().strip())
             weight = float(self.weight_var.get().strip())
             age = int(self.age_var.get().strip())
+            gender = self.gender_var.get().strip()
 
             if height_cm <= 0 or weight <= 0 or age <= 0:
                 raise ValueError("Hodnoty musia byť kladné.")
+            bmi = self.calculate_bmi(height_cm, weight)
+            bmr = self.calculate_calories(height_cm, weight, age, gender)
 
-            height_m = height_cm / 100  # Convert height to meters
-            bmi = weight / (height_m ** 2)  # BMI calculation
-
-            # Interpretácia výsledkov s ohľadom na vek
             if age < 18:
                 status = self.interpret_bmi_youth(bmi)
             elif age >= 65:
@@ -115,42 +139,54 @@ class App:
             else:
                 status = self.interpret_bmi_adult(bmi)
 
-            self.output_var.set(f"Váš BMI: {bmi:.2f} ({status})")
+            bmr_output = f"\nPotrebný počet kalórií na deň pre ľudí vo vašej kategórií: {calories_dict[status] * bmr}"
+            self.output_var.set(f"Váš BMI: {bmi:.2f} ({categories_dict[status]})" + bmr_output + graph_text)
             self.update_graph(age)
-
         except ValueError:
             self.output_var.set("Chyba: Skontrolujte vstupy.")
-            messagebox.showerror("Chyba", "Zadali ste nekorektné hodnoty. Uistite sa, že hodnoty sú kladné.")
+            messagebox.showerror("Chyba", "Zadali ste nekorektné hodnoty. Uistite sa, že hodnoty sú kladné a je zadané pohlavie.")
+
+    def calculate_bmi(self, height_cm, weight):
+        height_m = height_cm / 100
+        bmi = weight / (height_m ** 2)
+        return bmi
 
     def interpret_bmi_youth(self, bmi):
         if bmi < 18.5:
-            return "Podváha (Konzultujte s lekárom)\nGraf BMI pre mládež:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
+            return 0
         elif 18.5 <= bmi < 24.9:
-            return "Normálna hmotnosť\nGraf BMI pre mládež:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
+            return 1
         elif 25 <= bmi < 29.9:
-            return "Nadváha (Konzultujte s lekárom)\nGraf BMI pre mládež:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
+            return 2
         else:
-            return "Obezita (Konzultujte s lekárom)\nGraf BMI pre mládež:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
+            return 3
 
     def interpret_bmi_adult(self, bmi):
         if bmi < 18.5:
-            return "Podváha\nGraf BMI pre dospelých:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
+            return 0
         elif 18.5 <= bmi < 24.9:
-            return "Normálna hmotnosť\nGraf BMI pre dospelých:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
+            return 1
         elif 25 <= bmi < 29.9:
-            return "Nadváha\nGraf BMI pre dospelých:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
+            return 2
         else:
-            return "Obezita\nGraf BMI pre dospelých:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
+            return 3
 
     def interpret_bmi_elderly(self, bmi):
         if bmi < 22:
-            return "Podváha (Konzultujte s lekáromm)\nGraf BMI pre ľudí nad 65 rokov:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
+            return 0
         elif 22 <= bmi < 27:
-            return "Normálna hmotnosť\nGraf BMI pre ľudí nad 65 rokov:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
+            return 1
         elif 27 <= bmi < 30:
-            return "Mierna nadváha\nGraf BMI pre ľudí nad 65 rokov:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
+            return 2
         else:
-            return "Obezita (Konzultujte s lekárom)\nGraf BMI pre ľudí nad 65 rokov:\npopis grafu: modrá = podváha, zelená = normálna hmotnosť, oranžová = nadváha, červená = obezita"
+            return 3
+
+    def calculate_calories(self, height_cm, weight, age, gender):
+        if gender == "Male":
+            bmr = 10 * weight + 6.25 * height_cm - 5 * age + 5
+        else:
+            bmr = 10 * weight + 6.25 * height_cm - 5 * age - 161
+        return bmr * 1.4
 
     def update_graph(self, age_category):
         self.canvas.delete("all")
